@@ -20,10 +20,38 @@ function clearup(path) {
         if (err) console.error(err.stack ? err.stack : err)
     })
 }
+router.use(function list(req, res, next) {
+    if (!req.query.hasOwnProperty('__list__')) {
+        return next();
+    }
+    var dirPath = path.resolve('/', req.path).replace(/^([a-z]:)?[\\\/]/, '');
+    dirPath = path.resolve(__dirname, 'public', dirPath);
+    fs.readdir(dirPath, function handle(err, files) {
+        if (err) return res.status(500).end(err.toString());
+        var count = 0;
+        var stats = {};
+        files.forEach(function loop (name) {
+            count++;
+            fs.stat(path.resolve(dirPath, name), function (err, stat) {
+                count--;
+                if (err) {
+                    console.error(err.stack ? err.stack : err);
+                } else {
+                    stats[name] = stat
+                }
+                check();
+            })
+        })
+        function check() {
+            if (count > 0) return;
+            res.json(stats);
+        }
+    })
+})
 router.post('/', urlencodedParser, upload.single('content'), function (req, res, next) {
     var body = req.body;
     if (!body.path) return next();
-    var savePath = path.resolve('/', body.path).replace(/^[\\\/]/, '');
+    var savePath = path.resolve('/', body.path).replace(/^([a-z]:)?[\\\/]/, '');
     savePath = path.resolve(__dirname, 'public', savePath);
     console.log(body.mode, savePath);
     mkdirp(path.dirname(savePath), function (err) {
