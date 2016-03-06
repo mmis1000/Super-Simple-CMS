@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>test</title>
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    </head>
+    <body>
+        <form method="POST" id="add" action="_blank">
+            <label for="title">標題</label>
+            <input type="text" name="title"/>
+            <label for="content">內容</label>
+            <input type="textarea" name="content"/>
+            <input type="submit" value="Submit"/>
+        </form>
+        
+        <div id="display"></div>
+        
+        <script type="text/javascript">
+            $('#add').on('submit', function (ev) {
+                ev.preventDefault();
+                var path = 'replies/' + Date.now().toString(16) + '.json';
+                var title = $(this).find('input[name=title]').val()
+                var content = $(this).find('input[name=content]').val()
+                $.post('/', {
+                    path: path,
+                    content: JSON.stringify({
+                        title: title,
+                        content: content
+                    })
+                }, function (res) {
+                    location.reload()
+                })
+            });
+            $.get('/replies/', {'__list__': ''}, function (res) {
+                console.log(res);
+                for (var key in res) {
+                    var value = res[key];
+                    if (value.mode & 0100000) {
+                        $.get('/replies/' + key, function (data) {
+                            $('#display').append($('<h1>').text(data.title))
+                            $('#display').append($('<p>').text(data.content))
+                        })
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
