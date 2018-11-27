@@ -10,7 +10,7 @@
   "license": "CC0",
   "dependencies": {
     "body-parser": "^1.15.0",
-    "ecstatic": "^1.4.0",
+    "ecstatic": "^3.3.0",
     "express": "^4.13.4",
     "mkdirp": "^0.5.1",
     "multer": "^1.1.0"
